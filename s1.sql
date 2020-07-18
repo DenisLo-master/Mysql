@@ -9,6 +9,5 @@ CREATE DATABASE IF NOT EXISTS sample;
 
 -- команда в терминале
 -- mysql sample < sample.sql;
-
 -- mysqldump --where='0 limit 100' mysql help_keyword > keyword.sql
 
