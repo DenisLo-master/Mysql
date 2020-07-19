@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS example;
 USE example;
 DROP TABLE IF EXISTS users;
-CREATE TABLE IF NOT EXISTS users(id INT,
+CREATE TABLE IF NOT EXISTS users(id SERIAL,
 name VARCHAR(255) COMMENT 'Название') COMMENT 'Таблица пользователей';
 
 -- команда в терминале
