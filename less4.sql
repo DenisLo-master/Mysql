@@ -60,13 +60,45 @@ UPDATE communities_users SET status_communities_id = FLOOR(1+RAND()*3);
 
 SELECT * FROM communities LIMIT 10;
 
-
-CREATE TABLE likes (
+DROP TABLE IF EXISTS posts;
+CREATE TABLE posts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
-  first_name VARCHAR(100) NOT NULL COMMENT "Имя пользователя",
-  last_name VARCHAR(100) NOT NULL COMMENT "Фамилия пользователя",
-  email VARCHAR(100) NOT NULL UNIQUE COMMENT "Почта",
-  phone VARCHAR(100) NOT NULL UNIQUE COMMENT "Телефон",
+  user_id int(10) unsigned NOT NULL COMMENT 'Ссылка на пользователя сделавшего пост',
+  media_id int(10) unsigned NOT NULL COMMENT 'Ссылка на медаи в посте',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
-) COMMENT "Пользователи";  
+) COMMENT "Пост (публикация)";  
+
+
+DROP TABLE IF EXISTS re_posts;
+CREATE TABLE re_posts (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
+  user_id int(10) unsigned NOT NULL COMMENT 'Ссылка на пользователя сделавшего репост',
+  post_id int(10) unsigned NOT NULL COMMENT 'Ссылка на публикацию',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
+) COMMENT "Ре-пост";  
+
+DROP TABLE IF EXISTS likes;
+CREATE TABLE likes (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
+  user_id int(10) unsigned NOT NULL COMMENT 'Ссылка на пользователя поставившего лайк',
+  post_id int(10) unsigned NOT NULL COMMENT 'Ссылка на публикацию которой поставили лайк',
+  liked BOOLEAN COMMENT 'Статус лайка, поставлен или снят',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
+) COMMENT "Лайки";  
+
+SELECT * FROM likes LIMIT 10;
+DESC likes;
+
+UPDATE likes SET updated_at = CURRENT_TIMESTAMP 
+   WHERE created_at > updated_at; 
+   
+SELECT * FROM posts LIMIT 10;  
+UPDATE posts SET updated_at = CURRENT_TIMESTAMP 
+   WHERE created_at > updated_at; 
+   
+SELECT * FROM re_posts LIMIT 10;  
+UPDATE re_posts SET updated_at = CURRENT_TIMESTAMP 
+   WHERE created_at > updated_at; 
