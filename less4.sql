@@ -16,6 +16,12 @@ SELECT COUNT(*) FROM users;
 ALTER TABLE messages ADD COLUMN is_modified BOOLEAN AFTER is_read;
 UPDATE messages SET is_modified = FLOOR(RAND()+0.5);  
 
+ALTER TABLE messages
+  ADD CONSTRAINT from_user_fk FOREIGN KEY (from_user_id) REFERENCES users (id);
+ALTER TABLE messages
+  ADD CONSTRAINT to_user_fk FOREIGN KEY (to_user_id) REFERENCES users (id);
+
+SELECT * FROM messages;
 
 SELECT * FROM media_types;
 ALTER TABLE media_types DROP COLUMN id;
@@ -60,34 +66,63 @@ UPDATE communities_users SET status_communities_id = FLOOR(1+RAND()*3);
 
 SELECT * FROM communities LIMIT 10;
 
-DROP TABLE IF EXISTS posts;
-CREATE TABLE posts (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
-  user_id int(10) unsigned NOT NULL COMMENT 'Ссылка на пользователя сделавшего пост',
-  media_id int(10) unsigned NOT NULL COMMENT 'Ссылка на медаи в посте',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
-) COMMENT "Пост (публикация)";  
-
-
-DROP TABLE IF EXISTS re_posts;
-CREATE TABLE re_posts (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
-  user_id int(10) unsigned NOT NULL COMMENT 'Ссылка на пользователя сделавшего репост',
-  post_id int(10) unsigned NOT NULL COMMENT 'Ссылка на публикацию',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
-) COMMENT "Ре-пост";  
-
+-- Таблица лайков
 DROP TABLE IF EXISTS likes;
 CREATE TABLE likes (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
-  user_id int(10) unsigned NOT NULL COMMENT 'Ссылка на пользователя поставившего лайк',
-  post_id int(10) unsigned NOT NULL COMMENT 'Ссылка на публикацию которой поставили лайк',
-  liked BOOLEAN COMMENT 'Статус лайка, поставлен или снят',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
-) COMMENT "Лайки";  
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  target_id INT UNSIGNED NOT NULL,
+  target_type_id INT UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица типов лайков
+DROP TABLE IF EXISTS target_types;
+CREATE TABLE target_types (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO target_types (name) VALUES 
+  ('messages'),
+  ('users'),
+  ('media'),
+  ('posts');
+ 
+ 
+SELECT * FROM target_types LIMIT 10;
+
+-- Заполняем лайки
+INSERT INTO likes 
+  SELECT 
+    to_user_id, 
+    FLOOR(1 + (RAND() * 100)), 
+    FLOOR(1 + (RAND() * 100)),
+    FLOOR(1 + (RAND() * 4)),
+    read_at 
+  FROM messages;
+   
+
+
+-- Проверим
+SELECT * FROM likes LIMIT 10;
+
+-- Создадим таблицу постов
+DROP TABLE IF EXISTS posts;
+CREATE TABLE posts (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  community_id INT UNSIGNED,
+  head VARCHAR(255),
+  body TEXT NOT NULL,
+  media_id INT UNSIGNED,
+  is_public BOOLEAN DEFAULT TRUE,
+  is_archived BOOLEAN DEFAULT FALSE,
+  views_counter INT UNSIGNED DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+); 
 
 SELECT * FROM likes LIMIT 10;
 DESC likes;
