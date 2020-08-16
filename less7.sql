@@ -23,7 +23,7 @@ SELECT * FROM orders;
 
 -- решение
 
-SELECT name FROM users JOIN orders WHERE  orders.user_id = users.id GROUP BY name;
+SELECT u.name, COUNT(o.id) FROM users AS u JOIN orders AS o ON o.user_id = u.id GROUP BY u.name;
 
 -- 2. Выведите список товаров products и разделов catalogs, который соответствует товару.
 DROP TABLE IF EXISTS products;
@@ -41,8 +41,11 @@ name VARCHAR(250));
 
 INSERT INTO catalogs (name) VALUES ('Для школы'),('Для офиса'), ('Для дома');
 
+
+SELECT * FROM products;
+SELECT * FROM catalogs;
 -- решение
-SELECT products.sku, catalogs.name AS catalog FROM products JOIN catalogs WHERE  products.catalog_id = catalogs.id;
+SELECT p.sku, c.name AS catalogs FROM products AS p RIGHT JOIN catalogs AS c ON p.catalog_id = c.id;
 
 
 /* 3. (по желанию) Пусть имеется таблица рейсов flights (id, from, to) и таблица городов cities (label, name). 
